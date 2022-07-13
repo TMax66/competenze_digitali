@@ -185,7 +185,7 @@ p4 <- df4 %>%
 ###plot p4----
 p4 + coord_flip()
 
-###plot patchwork----
+##plot patchwork----
   p1 + coord_flip() + 
   p2 + coord_flip() + 
   p3 + coord_flip() + 
@@ -237,7 +237,7 @@ p5 <- dt %>%
   scale_x_discrete(labels = function(x) str_wrap(x, width = 30), expand = c(0, 0)) +
   guides(fill = guide_legend(reverse = T))
 
-###plot p5----
+##plot p5----
 p5 + coord_flip()
 
 
@@ -282,66 +282,44 @@ p6 <- ggplot(dat1, aes(x = value, y = Area, color = punteggio)) +
     coord_cartesian(xlim = c(10, 30)) +
     guides(colour = guide_legend(override.aes = list(size = 8)))
 
-#plot p6----
+##plot p6----
 p6  
-  
-# TO DO --> TEST E CORSI TOTALI ESEGUITI----
-  
-dt <- read_excel("GeneraliDaSIto/Risultati assessment.xlsx")
+ 
+ 
+#COMPETENZE PER REPARTO----
+path <- "C:/Users/andrea.boscarino/Desktop/Rprojects/competenze_digitali/IZSLER"
+file.list <- list.files(path, pattern=NULL, all.files=FALSE, full.names=TRUE)
+#df.list <- lapply(file.list, read_excel)
+df.list <- sapply(file.list, read_excel, simplify=FALSE)
+data <- bind_rows(df.list, .id = "id")
+data <- data %>%
+  fill(`Area Di Competenza`,Competenza, .direction = "downup")
+data <- data %>% 
+  mutate(id = str_extract(id, "(?<=IZSLER/).+(?=.xlsx)")) %>% 
+  rename(Reparto = id)
+data <- data %>% mutate(across(where(is_character),as_factor))
+
+View(data)
+
+# data %>% complete(Reparto,`Area Di Competenza`,Competenza,`Livello Padronanza`,
+#          fill = list(AVANZATO=0,BASE=0,NESSUNO=0,INTERMEDIO=0)) 
 
 
-dt <- dt[, c(3:7)]
-
-colnames(dt) <- c("Competenza","Nessun livello","Livello base", "Livello intermedio", "Livello avanzato")
-
-# df1 <- as.data.frame(df1)
-# class(df1)
-# df1
-
-dt <- pivot_longer(dt, -Competenza, names_to = 'livello') %>% 
-  uncount(value)
-
-dt <- dt %>% mutate(across(where(is_character),as_factor))
-
-dt$livello <- factor(dt$livello, levels = c("Livello avanzato", "Livello intermedio", "Livello base", "Nessun livello"))
-
-p5 <- dt %>%
-  group_by(Competenza, livello) %>% 
-  summarise(n = n()) %>%
-  mutate(freq = n / sum(n)) %>%
-  ggplot(aes(x = Competenza, y = freq , fill = livello)) +
-  geom_bar(position = "fill", stat = "identity", color = 'black', width = 0.9) +
-  scale_y_continuous(labels = scales::percent, expand = c(0, 0)) + #expand=c(0,0),
-  geom_text(aes(label = paste0(round(freq, 2)*100,"%","\n(n=",n,")")), 
-                position = position_stack(vjust = 0.5), size = 2.7) +
-  ggtitle("Livello di padronanza raggiunto dai 488 dipendenti risultati idonei per ciascuna delle 11 competenze.") +
-  theme_bw() +
-  theme(
-        #aspect.ratio = 1.1,
-        plot.title = element_text(size = 11),
-        axis.text.y=element_text(size=7.5),
-        axis.title.x = element_blank(),
-        axis.title.y = element_blank(),
-        axis.ticks.x = element_blank(),
-        axis.text.x = element_blank(),
-        legend.position = "bottom",
-        legend.title.align = 0.5,
-        legend.title=element_blank()) +
-  # scale_x_discrete(labels = c("Abilitati" = "Dipendenti \nabilitati",
-  #                             "Registrati" = "Dipendenti \nregistrati")) +
-  scale_fill_manual(labels = c("Livello\navanzato", "Livello\nintermedio", "Livello\nbase", "Nessun\nlivello"),
-                    values = c("#5ab4ac", "#acd9d5", "#ebd9b2", "#d8b365")) +
-  scale_x_discrete(labels = function(x) str_wrap(x, width = 30), expand = c(0, 0)) +
-  guides(fill = guide_legend(reverse = T))
-
-p5 + coord_flip()
 
 
-  
-  
-  
 
-# NO --> PUNTEGGIO DELL'AMMINISTRAZIONE (VEDI CODICI PERFORMANCE) ----
+
+
+
+
+
+
+
+
+
+# to do --> TEST E CORSI TOTALI ESEGUITI----
+
+# no --> PUNTEGGIO DELL'AMMINISTRAZIONE (VEDI CODICI PERFORMANCE) ----
 # dat <- read_excel("GeneraliDaSIto/Punteggio dell'amministrazione.xlsx")
 # 
 # dat <- dat[, c(2:4)]
@@ -381,7 +359,7 @@ p5 + coord_flip()
 
 
 
-# ## NO --> ADESIONE AL TEST----
+# ## no --> ADESIONE AL TEST----
 # df0 <- df[,c(1, 3, 4)]
 # # df0 <- as.data.frame(t(df0)) %>% 
 # #        row_to_names(row_number = 1)
